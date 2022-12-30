@@ -124,7 +124,7 @@ protected:
      * @param queryString   The query to subscribe to.
      * @return The subscription to the data points.
      */
-    AsyncSubscriptionPtr_t<DataPointReply> subscribeDataPoints(const std::string& queryString);
+    AsyncSubscriptionPtr_t<DataPointReply> subscribeDataPoints(const Query& query);
 
     /**
      * @brief Get the Vehicle Data Broker Client object.

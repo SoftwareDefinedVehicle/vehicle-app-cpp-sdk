@@ -26,6 +26,7 @@ namespace velocitas {
 
 class DataPointReply;
 class DataPointValue;
+class Query;
 
 /**
  * @brief Interface for implementing VehicleDataBroker clients.
@@ -50,7 +51,7 @@ public:
      * @return The AsyncResult containing the values of all requested data points
      */
     virtual AsyncResultPtr_t<DataPointReply>
-    getDatapoints(const std::vector<std::string>& datapoints) = 0;
+    getDatapoints(const std::vector<DataPointCRef>& datapoints) = 0;
 
     /**
      * @brief Set datapoint values in the VDB.
@@ -68,7 +69,7 @@ public:
      *
      * @return The subscription to the data points.
      */
-    virtual AsyncSubscriptionPtr_t<DataPointReply> subscribe(const std::string& query) = 0;
+    virtual AsyncSubscriptionPtr_t<DataPointReply> subscribe(const Query& query) = 0;
 
     /**
      * @brief Create an instance of the IVehicleDataBrokerClient.

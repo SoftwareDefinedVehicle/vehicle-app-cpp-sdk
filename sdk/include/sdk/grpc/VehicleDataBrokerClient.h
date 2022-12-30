@@ -24,8 +24,9 @@
 
 namespace velocitas {
 
-class RecurringJob;
 class BrokerAsyncGrpcFacade;
+class Query;
+class RecurringJob;
 
 /**
  * VehicleDataBrokerClient provides the Graph API to access vehicle services
@@ -44,12 +45,12 @@ public:
     VehicleDataBrokerClient& operator=(VehicleDataBrokerClient&&)      = delete;
 
     AsyncResultPtr_t<DataPointReply>
-    getDatapoints(const std::vector<std::string>& datapoints) override;
+    getDatapoints(const std::vector<DataPointCRef>& datapoints) override;
 
     AsyncResultPtr_t<SetErrorMap_t>
     setDatapoints(const std::vector<std::unique_ptr<DataPointValue>>& datapoints) override;
 
-    AsyncSubscriptionPtr_t<DataPointReply> subscribe(const std::string& query) override;
+    AsyncSubscriptionPtr_t<DataPointReply> subscribe(const Query& query) override;
 
 private:
     static std::string getVdbEndpointAddress();

@@ -183,8 +183,13 @@ sdv::databroker::v1::Datapoint convertToGrpcDataPoint(const DataPointValue& data
     return grpcDataPoint;
 }
 
+static bool isTypeMatching(const DataPoint&                      dataPoint,
+                           const sdv::databroker::v1::DataPoint& grpcDataPoint) {
+    return true;
+}
+
 std::shared_ptr<DataPointValue>
-convertDataPointToInternal(const std::string&                    name,
+convertDataPointToInternal(const Datapoint&                      dataPoint,
                            const sdv::databroker::v1::Datapoint& grpcDataPoint) {
     GrpcDataPointValueProvider valueProvider{grpcDataPoint};
 
@@ -249,8 +254,35 @@ convertDataPointToInternal(const std::string&                    name,
 }
 
 AsyncResultPtr_t<DataPointReply>
-VehicleDataBrokerClient::getDatapoints(const std::vector<std::string>& datapoints) {
+VehicleDataBrokerClient::getDatapoints(const std::vector<DataPointCRef>& dataPoints) {
     auto result = std::make_shared<AsyncResult<DataPointReply>>();
+    m_asyncBrokerFacade->GetDatapoints(
+        dataPoints,
+        [result, dataPoints](auto reply) {
+            DataPointMap_t resultMap;
+            for (auto dataPoint : dataPoints) {
+                auto returnedValue = reply.datapoints().find(dataPoint.getPath());
+                if (returnedValue != reply.datapoints().end()) {
+                    ++matchedDataPoints;
+                    resultMap[dataPoint.getPath()] =
+                        convertDataPointToInternal(dataPoint, *repliedValue);
+                } else {
+                    resultMap[dataPoint.getPath()] =
+                }
+            }
+
+            for (const auto [key, value] : reply.datapoints()) {
+                resultMap[key] = convertDataPointToInternal(key, value);
+            }
+
+            result->insertResult(DataPointValues(std::move(resultMap)));
+        },
+        [result](auto status) {
+            result->insertError(
+                Status(fmt::format("RPC 'GetDatapoints' failed:", status.error_message())));
+        });
+
+    auto result = std::make_shared<AsyncResult<DataPointValues>>();
     m_asyncBrokerFacade->GetDatapoints(
         datapoints,
         [result](auto reply) {
@@ -293,8 +325,7 @@ AsyncResultPtr_t<IVehicleDataBrokerClient::SetErrorMap_t> VehicleDataBrokerClien
     return result;
 }
 
-AsyncSubscriptionPtr_t<DataPointReply>
-VehicleDataBrokerClient::subscribe(const std::string& query) {
+AsyncSubscriptionPtr_t<DataPointReply> VehicleDataBrokerClient::subscribe(const Query& query) {
     auto subscription = std::make_shared<AsyncSubscription<DataPointReply>>();
     m_asyncBrokerFacade->Subscribe(
         query,

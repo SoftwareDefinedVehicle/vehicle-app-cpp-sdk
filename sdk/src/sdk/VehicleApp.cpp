@@ -84,7 +84,7 @@ VehicleApp::getDataPoint_internal(const DataPoint& dataPoint) const {
     return m_vdbClient->getDatapoints(dataPointPaths);
 }
 
-AsyncSubscriptionPtr_t<DataPointReply> VehicleApp::subscribeDataPoints(const std::string& query) {
+AsyncSubscriptionPtr_t<DataPointReply> VehicleApp::subscribeDataPoints(const Query& query) {
     return m_vdbClient->subscribe(query);
 }
 

@@ -24,6 +24,23 @@
 
 namespace velocitas {
 
+class Query final {
+public:
+    [[nodiscard]] const std::vector<std::reference_wrapper<const DataPoint>>&
+    getSelectedDataPoints() const {
+        return m_selectedDataPoints;
+    }
+    [[nodiscard]] std::string getQueryString() const { return m_queryString; }
+
+private:
+    Query(std::vector<std::reference_wrapper<const DataPoint>> dataPoints, std::string queryString);
+
+    std::vector<std::reference_wrapper<const DataPoint>> m_selectedDataPoints;
+    std::string                                          m_queryString;
+
+    friend class QueryBuilder;
+};
+
 template <typename T> class WhereClauseBuilder;
 
 /**
@@ -46,7 +63,8 @@ public:
      * @param dataPoint   List of references to data points to be selected
      * @return A new instance of QueryBuilder
      */
-    static QueryBuilder select(const std::vector<std::reference_wrapper<DataPoint>>& dataPoints);
+    static QueryBuilder
+    select(const std::vector<std::reference_wrapper<const DataPoint>>& dataPoints);
 
     /**
      * @brief Adds a condition for a data point to be met for getting a notification
@@ -65,12 +83,13 @@ public:
      *
      * @return The compiled query
      */
-    [[nodiscard]] std::string build() const;
+    [[nodiscard]] Query build() const;
 
 private:
     QueryBuilder() = default;
 
-    std::vector<std::string> m_queryContext;
+    std::vector<std::string>                             m_queryContext;
+    std::vector<std::reference_wrapper<const DataPoint>> m_selectedDataPoints;
 
     template <typename T> friend class WhereClauseBuilder;
 };
@@ -123,7 +142,7 @@ public:
      *
      * @return The compiled query
      */
-    [[nodiscard]] std::string build() const { return m_parent->build(); }
+    [[nodiscard]] Query build() const { return m_parent->build(); }
 
 private:
     WhereClauseBuilder(QueryBuilder* parent, const DataPoint& dataPoint)

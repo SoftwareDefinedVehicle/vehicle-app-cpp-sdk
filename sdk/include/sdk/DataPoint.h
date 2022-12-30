@@ -27,6 +27,9 @@
 
 namespace velocitas {
 
+class DataPoint;
+using DataPointCRef = std::reference_wrapper<const DataPoint>;
+
 /**
  * @brief Base class for data points.
  *        Do not use for modelling directly.
@@ -52,8 +55,7 @@ public:
     bool operator<(const DataPoint& rhs) const { return getPath() < rhs.getPath(); }
 };
 
-inline bool operator<(const std::reference_wrapper<DataPoint>& lhs,
-                      const std::reference_wrapper<DataPoint>& rhs) {
+inline bool operator<(const DataPointCRef& lhs, const DataPointCRef& rhs) {
     return lhs.get().getPath() < rhs.get().getPath();
 }
 

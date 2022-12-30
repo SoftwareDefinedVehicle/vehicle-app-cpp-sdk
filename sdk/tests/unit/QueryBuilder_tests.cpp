@@ -23,30 +23,30 @@ using namespace velocitas;
 TEST(Test_QueryBuilder, select_singleDataPoint) {
     DataPointFloat foo{"foo", nullptr};
     const auto     query = QueryBuilder::select(foo).build();
-    ASSERT_EQ(query, "SELECT foo");
+    EXPECT_EQ(query.getQueryString(), "SELECT foo");
 }
 
 TEST(Test_QueryBuilder, select_multipleDataPoints) {
     DataPointFloat foo{"foo", nullptr};
     DataPointFloat bar{"bar", nullptr};
     const auto     query = QueryBuilder::select({foo, bar}).build();
-    ASSERT_EQ(query, "SELECT foo, bar");
+    EXPECT_EQ(query.getQueryString(), "SELECT foo, bar");
 }
 
 TEST(Test_QueryBuilder, whereCondition_gt) {
     DataPointFloat foo{"foo", nullptr};
     const auto     query = QueryBuilder::select(foo).where(foo).gt(10.0F).build();
-    ASSERT_EQ(query, "SELECT foo WHERE foo > 10.000000");
+    EXPECT_EQ(query.getQueryString(), "SELECT foo WHERE foo > 10.000000");
 }
 
 TEST(Test_QueryBuilder, whereCondition_lt) {
     DataPointInt32 foo{"foo", nullptr};
     const auto     query = QueryBuilder::select(foo).where(foo).lt(100).build();
-    ASSERT_EQ(query, "SELECT foo WHERE foo < 100");
+    EXPECT_EQ(query.getQueryString(), "SELECT foo WHERE foo < 100");
 }
 
 TEST(Test_QueryBuilder, whereCondition_eq) {
     DataPointBoolean foo{"foo", nullptr};
     const auto       query = QueryBuilder::select(foo).where(foo).eq(true).build();
-    ASSERT_EQ(query, "SELECT foo WHERE foo = 1");
+    EXPECT_EQ(query.getQueryString(), "SELECT foo WHERE foo = 1");
 }

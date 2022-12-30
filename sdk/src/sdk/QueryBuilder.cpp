@@ -18,18 +18,25 @@
 #include "sdk/Utils.h"
 
 #include <algorithm>
+#include <utility>
 
 namespace velocitas {
+
+Query::Query(std::vector<std::reference_wrapper<const DataPoint>> dataPoints,
+             std::string                                          queryString)
+    : m_selectedDataPoints{std::move(dataPoints)}
+    , m_queryString{std::move(queryString)} {}
 
 QueryBuilder QueryBuilder::select(const DataPoint& dataPoint) {
     QueryBuilder builder;
     builder.m_queryContext.emplace_back("SELECT");
     builder.m_queryContext.push_back(dataPoint.getPath());
+    builder.m_selectedDataPoints.push_back(std::cref(dataPoint));
     return builder;
 }
 
 QueryBuilder
-QueryBuilder::select(const std::vector<std::reference_wrapper<DataPoint>>& dataPoints) {
+QueryBuilder::select(const std::vector<std::reference_wrapper<const DataPoint>>& dataPoints) {
     QueryBuilder builder;
     builder.m_queryContext.emplace_back("SELECT");
 
@@ -39,9 +46,13 @@ QueryBuilder::select(const std::vector<std::reference_wrapper<DataPoint>>& dataP
                    [](const auto& dataPoint) { return dataPoint.get().getPath(); });
 
     builder.m_queryContext.emplace_back(StringUtils::join(paths, ", "));
+
+    builder.m_selectedDataPoints = dataPoints;
     return builder;
 }
 
-std::string QueryBuilder::build() const { return StringUtils::join(m_queryContext, " "); }
+Query QueryBuilder::build() const {
+    return Query(m_selectedDataPoints, StringUtils::join(m_queryContext, " "));
+}
 
 } // namespace velocitas
